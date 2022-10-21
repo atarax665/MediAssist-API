@@ -21,5 +21,21 @@ app.use(require('./routes/post'))
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
  app.listen(PORT,()=>{
-     console.log("Server is up at ",PORT)
+    console.log("Server is running on", PORT)
+    app.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.log('Address in use, retrying...');
+            setTimeout(() => {
+                server.close();
+                server.listen(PORT);
+            }, 1000);
+        }
+    }
+    )
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (err, promise) => {
+        console.log(`Logged Error: ${err}`);
+        server.close(() => process.exit(1));
+    }
+    )
  })
